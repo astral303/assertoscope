@@ -1,0 +1,81 @@
+[tools]
+# mise installs Rust through rustup, and without `profile` it takes whichever
+# profile that machine's rustup is set to — `default` on a developer machine,
+# `minimal` on a CI runner. `minimal` has no rustfmt or clippy for the
+# format-check and clippy tasks. Naming both the profile and the components
+# makes the toolchain the same everywhere and holds it to what is used:
+# `default` would also carry rust-docs into every cache entry and release build.
+# rust-src is the standard library source an IDE reads for navigation and
+# completion in std; rustup's `minimal` profile leaves it out.
+rust = { version = "1.99.1", profile = "minimal", components = ["rustfmt", "clippy", "rust-src"] }
+cargo-release = "1.1.5"
+# Reflows the changelog section into release notes (scripts/release-notes.sh).
+# Pinned from its GitHub release. The `cargo:` backend would compile it on
+# every release run: cargo-binstall rejects panache's archives because they
+# lack the crate's second binary.
+"github:jolars/panache" = "3.14.0"
+
+[settings]
+lockfile = true
+# Every version above is exact: `mise install <tool>` re-resolves a floating
+# version and ignores mise.lock, and once installed a tool named `latest` in
+# mise.toml with a different version in mise.lock. Adding a tool option changes
+# its request, so mise.lock has to be refreshed with `mise lock <tool>` when one
+# changes.
+locked = true
+# Print each task's output as one labelled block, so parallel checks do not
+# interleave.
+task.output = "keep-order"
+
+[tasks.check]
+description = "Check the toolchain pin, the bash scripts' syntax and formatting, run Clippy and the tests, and build"
+depends = ["check-toolchain-pin", "check-scripts", "format-check", "clippy", "test", "build"]
+
+[tasks.check-ci]
+description = "Run check, then fail on an uncommitted change to a tracked file"
+depends = ["check"]
+run = [
+  "git diff --exit-code --stat",
+  "git diff --cached --exit-code --stat",
+]
+
+[tasks.format-check]
+description = "Report Rust formatting violations without rewriting files"
+run = "cargo fmt --all -- --check"
+
+[tasks.clippy]
+description = "Run Clippy on every target and fail on any warning"
+run = "cargo clippy --all-targets --locked --message-format=short -- -D warnings"
+
+[tasks.test]
+description = "Run the test suite"
+run = "cargo test --all --locked --quiet --message-format=short"
+# The tests create their temporary folders in target, which a developer's
+# antivirus exclusion for the project folder usually covers. Scanning every
+# file the tests write in the system temp folder slows the run. Only Windows
+# reads TMP and TEMP; Linux and macOS read TMPDIR.
+env = { TMP = "{{config_root}}/target", TEMP = "{{config_root}}/target" }
+
+[tasks.build]
+description = "Build every package"
+run = "cargo build --all --locked --message-format=short"
+
+[tasks.release-preview]
+description = "Show what release-execute would bump, commit, publish, tag and push"
+usage = '''
+arg "[bump]" default="patch" help="patch, minor, major or a version"
+flag "--no-verify" help="Skip building the package for the preview"
+'''
+run = "cargo release {{usage.bump}} {% if usage.no_verify %}--no-verify{% endif %}"
+
+[tasks.release-execute]
+description = "Bump the version, retitle the changelog, commit, publish, tag and push"
+# cargo release asks for confirmation; keep-order output does not pass the
+# answer through.
+interactive = true
+# Hides mise's echo of each command, which would print the next steps twice.
+quiet = true
+usage = 'arg "[bump]" default="patch" help="patch, minor, major or a version"'
+run = [
+  "cargo release {{usage.bump}} --execute"
+]
