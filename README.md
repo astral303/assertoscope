@@ -256,8 +256,8 @@ assertion failed: order A-17 should match its quote
   see below.
 - These do not compile inside an assertion: a `#[repr(packed)]` field, a
   `static mut`, and the assertion itself in a `const fn`.
-- The macros expand to paths that start with `::assertoscope`, so the crate
-  must be depended on under its own name.
+- The crate must be depended on under its own name: the macros expand to
+  paths that start with `::assertoscope`.
 - Clippy lints that skip macro code, such as `cast_possible_truncation`, do
   not fire inside a condition with a call. A condition without a call is
   linted as with the standard `assert!`.
