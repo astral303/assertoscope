@@ -258,6 +258,9 @@ assertion failed: order A-17 should match its quote
   `static mut`, and the assertion itself in a `const fn`.
 - The macros expand to paths that start with `::assertoscope`, so the crate
   must be depended on under its own name.
+- Clippy lints that skip macro code, such as `cast_possible_truncation`, do
+  not fire inside a condition with a call. A condition without a call is
+  linted as with the standard `assert!`.
 - Values are aligned by character count, so a value containing wide
   characters shifts the values to its right.
 

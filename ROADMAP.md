@@ -31,6 +31,21 @@ moves to CHANGELOG.md when it ships and is removed here.
 
 ## Expressions
 
+- Clippy lints for a condition with a call: the standard `assert!` reports
+  `cast_possible_truncation` on `items.len() as u8`; assertoscope's
+  `assert!` does not.
+  - Cause: once a condition contains a call, each value expression is
+    wrapped in a generated `match`, and the whole condition carries the
+    macro's syntax context. Clippy lints that skip macro code do not fire
+    on it. A condition without a call is emitted as written and is linted.
+  - Candidate fix: statement-form lowering, one `let` per recorded value:
+    `let v1 = items.len(); record(&v1); let v2 = v1 as u8; ...`. A compile
+    error would then point at the whole subexpression, where today it
+    points at one token.
+  - Cost: the temporaries would need the user's syntax context and lose
+    macro hygiene. A temporary could collide with a local of the same name
+    in the user's code; a prefix such as `__assertoscope_` makes that name
+    unlikely there.
 - Record values inside closures per invocation, shown as a list under the
   closure body, so `items.iter().all(|i| i.valid)` shows which element
   failed. Needs a recorder the closure can borrow, which rules out `move`
