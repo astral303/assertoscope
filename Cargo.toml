@@ -1,0 +1,47 @@
+[workspace]
+members = []
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/astral303/assertoscope"
+rust-version = "1.85"
+
+# Both crates carry one version and release in one commit under one tag.
+[workspace.metadata.release]
+shared-version = true
+consolidate-commits = true
+
+[package]
+name = "assertoscope"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Groovy-style power assertions: assert!, assert_eq! and assert_ne! that show every value inside a failing expression"
+readme = "README.md"
+keywords = ["assert", "assertions", "power-assert", "testing", "diagnostics"]
+categories = ["development-tools::testing", "development-tools::debugging"]
+
+[package.metadata.release]
+allow-branch = ["main"]
+pre-release-commit-message = "release v{{version}}"
+tag-name = "v{{version}}"
+tag-message = "release v{{version}}"
+pre-release-replacements = [
+  { file = "CHANGELOG.md", search = "(?m)^## Unreleased$", replace = "## v{{version}} ({{date}})", exactly = 1 },
+]
+
+[lints]
+workspace = true
+
+[workspace.lints.rust]
+missing_docs = "warn"
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
