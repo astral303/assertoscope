@@ -1,5 +1,5 @@
 [workspace]
-members = []
+members = ["macros"]
 
 [workspace.package]
 version = "0.1.0"
@@ -33,6 +33,13 @@ tag-message = "release v{{version}}"
 pre-release-replacements = [
   { file = "CHANGELOG.md", search = "(?m)^## Unreleased$", replace = "## v{{version}} ({{date}})", exactly = 1 },
 ]
+
+[dependencies]
+assertoscope-macros = { version = "=0.1.0", path = "macros" }
+
+[dev-dependencies]
+# tests/compile_fail.rs checks the error an unsupported shape reports.
+trybuild = "1.0"
 
 [lints]
 workspace = true

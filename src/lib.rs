@@ -1,8 +1,35 @@
-//! Groovy-style power assertions for Rust: the runtime that records values
-//! while an assertion evaluates and renders the failure diagram.
+//! Groovy-style power assertions for Rust.
+//!
+//! [`assert!`], [`assert_eq!`] and [`assert_ne!`] replace the standard
+//! macros. When an assertion fails, the panic message shows the expression
+//! with the value of each local, constant, field, element, call and
+//! operator under it:
+//!
+//! ```should_panic
+//! use assertoscope::assert;
+//!
+//! let prices = [12, 8, 5];
+//! let shipping = 5;
+//!
+//! assert!(prices.iter().sum::<i32>() + shipping == 20);
+//! ```
+//!
+//! ```text
+//! assertion failed
+//!
+//!     prices.iter().sum::<i32>() + shipping == 20
+//!     |      |      |            | |        |
+//!     |      |      25           | 5        false
+//!     |      Iter([12, 8, 5])    30
+//!     [12, 8, 5]
+//! ```
 //!
 //! Values are rendered with `Debug`; a value whose type has no `Debug` is
-//! left out.
+//! left out. The `debug_assert!` family is provided as well.
+
+pub use assertoscope_macros::{
+    assert, assert_eq, assert_ne, debug_assert, debug_assert_eq, debug_assert_ne,
+};
 
 mod capture;
 mod recorder;

@@ -1,0 +1,23 @@
+[package]
+name = "assertoscope-macros"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Procedural macros behind assertoscope; depend on assertoscope instead"
+
+[lib]
+proc-macro = true
+
+# The root crate's tag covers both crates.
+[package.metadata.release]
+tag = false
+
+[dependencies]
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "2.0", features = ["full"] }
+
+[lints]
+workspace = true

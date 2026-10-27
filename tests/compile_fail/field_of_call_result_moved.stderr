@@ -1,0 +1,34 @@
+error[E0507]: cannot move out of a shared reference
+  --> tests/compile_fail/field_of_call_result_moved.rs:19:21
+   |
+19 |     assert!(fetch().body.unwrap() == "text");
+   |                     ^^^^ ------ value moved due to this method call
+   |                     |
+   |                     move occurs because value has type `Option<String>`, which does not implement the `Copy` trait
+   |
+note: `std::option::Option::<T>::unwrap` takes ownership of the receiver `self`, which moves value
+  --> $RUST/core/src/option.rs
+   |
+   |     pub const fn unwrap(self) -> T {
+   |                         ^^^^
+   = note: this error originates in the macro `assert` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider calling `.as_ref()` to borrow the value's contents
+   |
+19 |     assert!(fetch().body.as_ref().unwrap() == "text");
+   |                         +++++++++
+help: consider calling `.as_mut()` to mutably borrow the value's contents
+   |
+19 |     assert!(fetch().body.as_mut().unwrap() == "text");
+   |                         +++++++++
+help: consider cloning the value if the performance cost is acceptable
+   |
+19 |     assert!(fetch().body.clone().unwrap() == "text");
+   |                         ++++++++
+
+error[E0596]: cannot borrow data in a `&` reference as mutable
+  --> tests/compile_fail/field_of_call_result_moved.rs:20:21
+   |
+20 |     assert!(fetch().items.pop() == Some(2));
+   |                     ^^^^^ cannot borrow as mutable
+   |
+   = note: this error originates in the macro `assert` (in Nightly builds, run with -Z macro-backtrace for more info)
