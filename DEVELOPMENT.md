@@ -33,17 +33,27 @@ one alone with `mise run <task>`.
 
 ## Tests
 
-Unit tests are fast, isolated and repeatable.
+Tests are fast, isolated and repeatable.
 
 ### Test types
 
-| Type                   | Where                                              | Runs                                |
-|------------------------|----------------------------------------------------|-------------------------------------|
-| Unit tests             | `#[cfg(test)]` modules under `src/`                | `mise run test`                     |
+| Type               | Where                                                                                                   | Runs            |
+|--------------------|---------------------------------------------------------------------------------------------------------|-----------------|
+| Unit tests         | `#[cfg(test)]` modules under `src/` and `macros/src/`                                                   | `mise run test` |
+| Integration tests  | `tests/`: the macros as a user calls them                                                               | `mise run test` |
+| Compile-fail tests | `tests/compile_fail/`: an expression the macros reject, with the error it must report in the `.stderr` beside it | `mise run test` |
 
 - Unit tests are sociable: each tests behaviour
   through real pieces together, not through test doubles of its
   collaborators.
+- A macro's behaviour is tested under `tests/`. The expansion refers to
+  `::assertoscope`, a path that does not resolve inside the crate's own
+  unit tests. `tests/readme.rs` runs each README example and fails when the
+  README's text block differs from what the library prints.
+- A compile-fail test's `.stderr` records the compiler's output for the
+  pinned toolchain. After a toolchain bump, or a change to the error the
+  macros produce, regenerate it with `TRYBUILD=overwrite mise run test` and
+  review the diff.
 
 ### Test first, whenever reasonable
 
@@ -145,5 +155,5 @@ passes does not cover that logic.
 
 ## Workflows
 
-- **Releasing rearview:** [RELEASE.md](RELEASE.md) covers the changelog,
+- **Releasing assertoscope:** [RELEASE.md](RELEASE.md) covers the changelog,
   the version bump and publishing.
